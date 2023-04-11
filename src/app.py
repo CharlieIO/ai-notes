@@ -87,7 +87,8 @@ def compress_image(img):
 
     # create an empty string buffer    
     buffer = BytesIO()
-    im1.save(buffer, "JPEG", quality=5)
+    rgb_im = im1.convert('RGB')
+    rgb_im.save(buffer, "JPEG", quality=5)
     return buffer
 
 @app.route('/get_image_url', methods=['POST'])
