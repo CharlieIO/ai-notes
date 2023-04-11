@@ -1,0 +1,10 @@
+Flask==2.1.1
+boto3==1.20.10
+markdown==3.3.6
+azure-cognitiveservices-vision-computervision==0.9.0
+azure-common==1.1.28
+azure-core==1.26.4
+gunicorn==20.1.0
+msrest==0.7.1
+Pillow==9.0.1
+openai==0.27.2
