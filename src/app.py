@@ -55,60 +55,30 @@ def index():
 
 @app.route('/view_result', methods=['GET'])
 def view_result():
-    img_uuids = request.args.get('img_uuids', None)
-    if img_uuids:
-        uuids = img_uuids.split("|")
-        image_urls = []
-        processing_results = []
+    img_uuid = request.args.get('img_uuid', None)
+    if img_uuid:
+        image_url = get_image_url(img_uuid)
+        processing_result = get_processing_result(img_uuid)
 
-        if len(uuids) > 1:  # If we have more than one UUID, we're dealing with a multi-image upload
-            image_urls.extend(get_image_url(img_uuid) for img_uuid in uuids)
-            processing_results.extend(get_processing_result(img_uuid) for img_uuid in uuids)
+        # Convert processing_result to HTML using Markdown
+        processing_result_html = Markup(markdown.markdown(processing_result))
 
-            # Also get the combined commentary
-            combined_commentary = get_combined_commentary(uuids)
-            combined_commentary_html = Markup(markdown.markdown(combined_commentary))
-        else:  # If we only have one UUID, it's a single-image upload
-            img_uuid = uuids[0]
-            image_urls.append(get_image_url(img_uuid))
-            processing_result = get_processing_result(img_uuid)
-            processing_results.append(Markup(markdown.markdown(processing_result)))
-            combined_commentary_html = ""
-
-        return render_template('result.html', 
-                                image_urls=image_urls, 
-                                processing_results=processing_results, 
-                                combined_commentary=combined_commentary_html)
+        return render_template('result.html', image_url=image_url, processing_result=processing_result_html)
     return jsonify({"error": "Invalid img_uuid"}), 400
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
     if request.method == 'POST':
-        images = request.files.getlist("image")
-        group_images = 'groupImages' in request.form  # boolean flag
+        img = request.files['image']
+        img_buffer = compress_image(img)
+        img_uuid = str(uuid.uuid4())
 
-        combined_images_text = ""
-        images_uuids = []
-        for img in images:
-            img_buffer = compress_image(img)
-            img_uuid = str(uuid.uuid4())
-            bucket = boto3.resource('s3').Bucket(BUCKET_NAME)
-            bucket.put_object(Body=img_buffer.getvalue(), Key=img_uuid)
+        bucket = boto3.resource('s3').Bucket(BUCKET_NAME)
+        bucket.put_object(Body=img_buffer.getvalue(), Key=img_uuid)
 
-            processing_result = process_image(get_image_url(img_uuid))
-            store_processing_result(img_uuid, processing_result)
-            images_uuids.append(img_uuid)
-
-            if group_images:
-                combined_images_text += processing_result + " "
-
-        if group_images:
-            # If grouped, pass the combined text of all the images to GPT-4
-            combined_commentary = get_commentary(combined_images_text)
-            # Store the combined commentary
-            store_combined_commentary(img_uuid, combined_commentary)
-
-        return jsonify({'img_uuids': images_uuids})
+        processing_result = process_image(get_image_url(img_uuid))
+        store_processing_result(img_uuid, processing_result)
+        return jsonify({'img_uuid': img_uuid})
 
     return render_template('upload.html')
 
@@ -168,30 +138,6 @@ def get_processing_result(img_uuid):
         }
     )
     return response['Item']['processing_result'] if 'Item' in response else None
-
-def store_combined_commentary(img_uuids, commentary):
-    table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-
-    # Join the image UUIDs with a known delimiter
-    key = "|".join(img_uuids)
-
-    table.put_item(
-        Item={
-            'img_uuids': key,
-            'combined_commentary': commentary
-        }
-    )
-
-def get_combined_commentary(img_uuids):
-    table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-    key = "|".join(img_uuids)
-
-    response = table.get_item(
-        Key={
-            'img_uuids': key
-        }
-    )
-    return response['Item']['combined_commentary'] if 'Item' in response else None
 
 if __name__ == '__main__':
     create_dynamodb_table()

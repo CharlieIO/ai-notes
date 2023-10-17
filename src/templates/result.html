@@ -15,15 +15,9 @@
 <body>
     <div class="container">
         <h1>Processing Result</h1>
-        {% for processing_result in processing_results %}
-            {{ processing_result }}
-        {% endfor %}
-        <h3>Combined Commentary</h3>
-        {{ combined_commentary }}
+        {{ processing_result }}
         <div class="center">
-            {% for image_url in image_urls %}
-                <img src="{{ image_url }}" alt="Uploaded image">
-            {% endfor %}
+            <img src="{{ image_url }}" alt="Uploaded image">
             <br>
             <a class="back-btn" href="{{ url_for('index') }}">Back to Upload</a>
         </div>
