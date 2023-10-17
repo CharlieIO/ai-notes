@@ -19,10 +19,10 @@
             <h1 class="text-center title">Upload Notes</h1>
             <form id="uploadForm" action="{{ url_for('upload_image') }}" method="post" enctype="multipart/form-data">
                 <div class="mb-3">
-                    <label for="image" class="form-label">Choose an image:</label>
-                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    <label for="image" class="form-label">Choose images:</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" multiple>
                 </div>
-                <button type="submit" class="btn submit-btn" value="Upload">Upload</button>
+                <button type="submit" class="btn submit-btn" value="Upload">Upload Images</button>
             </form>
         </div>
     </div>
@@ -33,6 +33,10 @@
             document.getElementById("loadingOverlay").style.display = "flex";
 
             const formData = new FormData(event.target);
+            let files = document.getElementById('image').files;
+            for(let i=0; i < files.length; i++){
+                formData.append('image', files[i]);
+            }
 
             try {
                 const response = await fetch(event.target.action, {
