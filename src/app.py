@@ -66,7 +66,7 @@ def view_result():
         return render_template('result.html', image_url=image_url, processing_result=processing_result_html)
     return jsonify({"error": "Invalid img_uuid"}), 400
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload_image():
     if request.method == 'POST':
         img = request.files['image']
@@ -78,8 +78,8 @@ def upload_image():
 
         processing_result = process_image(get_image_url(img_uuid))
         store_processing_result(img_uuid, processing_result)
+        return jsonify({'img_uuid': img_uuid})
 
-        return redirect(url_for('view_result', img_uuid=img_uuid))
     return render_template('upload.html')
 
 def compress_image(img):

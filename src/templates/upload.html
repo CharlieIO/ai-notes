@@ -29,26 +29,25 @@
 
     <script>
         document.getElementById("uploadForm").addEventListener("submit", async function (event) {
-            event.preventDefault(); // Prevent the form from causing a page load
-
+            event.preventDefault();
             document.getElementById("loadingOverlay").style.display = "flex";
 
             const formData = new FormData(event.target);
+
             try {
-                const response = await fetch(event.target.action, { // event.target.action is the form's 'action' attribute
+                const response = await fetch(event.target.action, {
                     method: 'POST',
                     body: formData
                 });
 
-                // If the upload was successful, you can redirect users to the view page.
                 if (response.ok) {
+                    // The server now returns JSON with img_uuid.
                     const json = await response.json();
-                    location.href = `/view_result?img_uuid=${json.img_uuid}`; // Assuming the server sends back JSON with `img_uuid`.
+                    location.href = `/view_result?img_uuid=${json.img_uuid}`;
                 } else {
                     throw new Error(`${response.status}: ${response.statusText}`);
                 }
             } catch (error) {
-                // Handle the error...
                 console.error("Upload failed:", error);
             } finally {
                 document.getElementById("loadingOverlay").style.display = "none";
