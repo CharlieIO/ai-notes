@@ -182,7 +182,7 @@ def store_combined_commentary(img_uuids, commentary):
 
     table.put_item(
         Item={
-            'img_uuids': key,
+            'img_uuid': key,
             'combined_commentary': commentary
         }
     )
@@ -193,7 +193,7 @@ def get_combined_commentary(img_uuids):
 
     response = table.get_item(
         Key={
-            'img_uuids': key
+            'img_uuid': key
         }
     )
     return response['Item']['combined_commentary'] if 'Item' in response else None
