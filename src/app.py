@@ -5,11 +5,8 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, M
 from PIL import Image
 import boto3
 import markdown
-import logging
 from processing import process_image
 
-# Logging setup
-logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -27,10 +24,9 @@ dynamodbClient = boto3.client('dynamodb', region_name=AWS_REGION, aws_access_key
 def create_dynamodb_table():
     existing_tables = dynamodbClient.list_tables()['TableNames']
 
-    logging.info("Existing tables: %s", existing_tables)
+    print(existing_tables)
 
     if DYNAMODB_TABLE_NAME not in existing_tables:
-        logging.info("Creating new DynamoDB table: %s", DYNAMODB_TABLE_NAME)
         table = dynamodb.create_table(
             TableName=DYNAMODB_TABLE_NAME,
             KeySchema=[
@@ -51,7 +47,6 @@ def create_dynamodb_table():
             }
         )
         table.meta.client.get_waiter('table_exists').wait(TableName=DYNAMODB_TABLE_NAME)
-        logging.info("Table %s created successfully", DYNAMODB_TABLE_NAME)
 
 @app.route('/')
 def index():
