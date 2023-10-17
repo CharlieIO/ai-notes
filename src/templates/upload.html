@@ -20,16 +20,7 @@
             <form id="uploadForm" action="{{ url_for('upload_image') }}" method="post" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="image" class="form-label">Choose images:</label>
-                    <form action="{{ url_for('upload_image') }}" method="post" enctype="multipart/form-data">
-                        <input type="file" class="form-control" id="image" name="image" accept="image/*" multiple>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="groupImages" name="groupImages">
-                            <label class="form-check-label" for="groupImages">
-                                Group images together
-                            </label>
-                        </div> 
-                        <button type="submit" class="btn submit-btn" value="Upload">Upload Images</button>
-                    </form>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" multiple>
                 </div>
                 <button type="submit" class="btn submit-btn" value="Upload">Upload Images</button>
             </form>
