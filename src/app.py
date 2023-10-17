@@ -173,38 +173,14 @@ def store_processing_result(img_uuid, processing_result):
 
 def get_processing_result(img_uuid):
     table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-    response = table.get_item(
-        Key={
-            'img_uuid': img_uuid
-        }
-    )
-    return response['Item']['processing_result'] if 'Item' in response else None
-
-def store_combined_commentary(img_uuids, commentary):
-    logging.info("Storing combined commentary...")
-    table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-
-    # Join the image UUIDs with a known delimiter
-    key = "|".join(img_uuids)
-
-    table.put_item(
-        Item={
-            'img_uuid': key,
-            'combined_commentary': commentary
-        }
-    )
-
-def get_combined_commentary(img_uuids):
-    logging.info("Getting combined commentary...")
-    table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-    key = "|".join(img_uuids)
-
-    response = table.get_item(
-        Key={
-            'img_uuid': key
-        }
-    )
-    return response['Item']['combined_commentary'] if 'Item' in response else None
+    logging.info("Retrieving processing result from DynamoDB for img_uuid: %s", img_uuid)
+    response = table.get_item(Key={'img_uuid': img_uuid})
+    if 'Item' in response:
+        logging.info("Processing result found: %s", response['Item']['processing_result'])
+        return response['Item']['processing_result']
+    else:
+        logging.warning('Processing result not found for img_uuid: %s', img_uuid)
+        return None
 
 if __name__ == '__main__':
     create_dynamodb_table()
