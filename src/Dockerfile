@@ -20,4 +20,4 @@ EXPOSE 8080
 ENV PORT 8080
 
 # Run app.py when the container launches
-CMD gunicorn --bind :$PORT app:app
+CMD gunicorn --timeout 0 --bind :$PORT app:app 
