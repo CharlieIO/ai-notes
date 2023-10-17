@@ -3,7 +3,7 @@ import os
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-model = "gpt-3.5-turbo"
+model = "gpt-4"
 
 prompt_system = """The following is text from a page of school notes. 
 Your job is to determine the subject, or topic, of the notes. 
@@ -12,8 +12,8 @@ Be sure to highlight areas which can be commonly misunderstood. Pretend you are 
 Your goal is to help someone study as effectively as possible.
 Ignore any typos or grammatical errors, as the scanned text is not perfect. 
 You should focus on substantive, factual errors. Do not worry about formatting, grammar, or misspellings.
-Be as technical and specific as possible. Try to avoid "bigger picture" study points.
-Provide the response in an easy-to-read, actionable format. If applicable, include some sample questions which could be asked on the exam.
+Be as technical and specific as possible. Try to avoid study points which go beyond the scope covered in the notes provided.
+Provide the response in an easy-to-read, actionable format. If applicable, include some sample questions which could be asked on the exam. Where possible, make them multiple choice.
 Format your response using markdown with the Subject in a larger size."""
 
 def get_commentary(notes: str):
