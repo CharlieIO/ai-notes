@@ -25,7 +25,6 @@ dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION, aws_access_key_id=
 dynamodbClient = boto3.client('dynamodb', region_name=AWS_REGION, aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 
 def create_dynamodb_table():
-    logging.info("Checking for existing tables...")
     existing_tables = dynamodbClient.list_tables()['TableNames']
 
     logging.info("Existing tables: %s", existing_tables)
@@ -56,15 +55,12 @@ def create_dynamodb_table():
 
 @app.route('/')
 def index():
-    logging.info("Calling the index...")
     img_uuid = request.args.get('img_uuid', None)
-    logging.info("img_uuid: %s", img_uuid)
     return render_template('upload.html', img_uuid=img_uuid)
 
 @app.route('/view_result', methods=['GET'])
 def view_result():
     img_uuids = request.args.get('img_uuids', None)
-    logging.info("img_uuids: %s", img_uuids)
     if img_uuids:
         uuids = img_uuids.split("|")
         image_urls = []
@@ -95,7 +91,6 @@ def upload_image():
     if request.method == 'POST':
         images = request.files.getlist("image")
         group_images = 'groupImages' in request.form  # boolean flag
-        logging.info("Group images: %s", group_images)
 
         combined_images_text = ""
         images_uuids = []
@@ -163,7 +158,6 @@ def get_image_url(img_uuid):
 
 def store_processing_result(img_uuid, processing_result):
     table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-    logging.info("Storing processing result in DynamoDB...")
     table.put_item(
         Item={
             'img_uuid': img_uuid,
@@ -173,14 +167,36 @@ def store_processing_result(img_uuid, processing_result):
 
 def get_processing_result(img_uuid):
     table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-    logging.info("Retrieving processing result from DynamoDB for img_uuid: %s", img_uuid)
-    response = table.get_item(Key={'img_uuid': img_uuid})
-    if 'Item' in response:
-        logging.info("Processing result found: %s", response['Item']['processing_result'])
-        return response['Item']['processing_result']
-    else:
-        logging.warning('Processing result not found for img_uuid: %s', img_uuid)
-        return None
+    response = table.get_item(
+        Key={
+            'img_uuid': img_uuid
+        }
+    )
+    return response['Item']['processing_result'] if 'Item' in response else None
+
+def store_combined_commentary(img_uuids, commentary):
+    table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+
+    # Join the image UUIDs with a known delimiter
+    key = "|".join(img_uuids)
+
+    table.put_item(
+        Item={
+            'img_uuid': key,
+            'combined_commentary': commentary
+        }
+    )
+
+def get_combined_commentary(img_uuids):
+    table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+    key = "|".join(img_uuids)
+
+    response = table.get_item(
+        Key={
+            'img_uuid': key
+        }
+    )
+    return response['Item']['combined_commentary'] if 'Item' in response else None
 
 if __name__ == '__main__':
     create_dynamodb_table()
