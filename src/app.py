@@ -6,13 +6,9 @@ from PIL import Image
 import boto3
 import markdown
 from processing import process_image
-from celery import Celery
+
 
 app = Flask(__name__)
-
-# Set up Celery connection
-celery = Celery(app.name, broker='pyamqp://guest@localhost//')
-celery.conf.update(app.config)
 
 BUCKET_NAME = 'notes-helper-imgstore'
 DYNAMODB_TABLE_NAME = 'notes-helper-image-processing-results'
