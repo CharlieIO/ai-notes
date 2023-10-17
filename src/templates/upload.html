@@ -55,8 +55,7 @@
                 if (response.ok) {
                     // The server now returns JSON with img_uuid.
                     const json = await response.json();
-                    img_uuids_str = json.img_uuids.join("|");
-                    location.href = `/view_result?img_uuids=${img_uuids_str}`;
+                    location.href = `/view_result?img_uuid=${json.img_uuid}`;
                 } else {
                     throw new Error(`${response.status}: ${response.statusText}`);
                 }
