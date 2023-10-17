@@ -28,8 +28,31 @@
     </div>
 
     <script>
-        document.getElementById("uploadForm").addEventListener("submit", function (event) {
+        document.getElementById("uploadForm").addEventListener("submit", async function (event) {
+            event.preventDefault(); // Prevent the form from causing a page load
+
             document.getElementById("loadingOverlay").style.display = "flex";
+
+            const formData = new FormData(event.target);
+            try {
+                const response = await fetch(event.target.action, { // event.target.action is the form's 'action' attribute
+                    method: 'POST',
+                    body: formData
+                });
+
+                // If the upload was successful, you can redirect users to the view page.
+                if (response.ok) {
+                    const json = await response.json();
+                    location.href = `/view_result?img_uuid=${json.img_uuid}`; // Assuming the server sends back JSON with `img_uuid`.
+                } else {
+                    throw new Error(`${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                // Handle the error...
+                console.error("Upload failed:", error);
+            } finally {
+                document.getElementById("loadingOverlay").style.display = "none";
+            }
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
